@@ -150,4 +150,4 @@ MIT License. Contributions welcome!
 
 ## 📍 GitHub Repository
 
-Coming soon... (link folgt nach Upload)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/HeWeDe/custom-barchart-card)
