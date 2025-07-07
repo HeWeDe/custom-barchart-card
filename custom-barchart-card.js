@@ -1,3 +1,21 @@
+/**
+ * Custom Barchart Card for Home Assistant
+ * Version: 1.1.2
+ * Date: 2025-07-06
+ * Repository: https://github.com/HeWeDe/custom-barchart-card
+ * Author: HeWeDe (https://github.com/HeWeDe)
+ * License: MIT
+ *
+ * Features:
+ * - Vertikale Balkendiagramme mit konfigurierbarer Skala (linear / symmetrisch logarithmisch)
+ * - Einzelne oder gruppierte Entitäten
+ * - Dynamische Gitternetzlinien und Y-Achse
+ * - Optionaler Maximalwert-Marker pro Balken
+ * - Klickbare Balken mit tap_action (more-info, navigate, url)
+ * - Einheitenanzeige, Farben, Beschriftung individuell einstellbar
+ * - Unterstützung von Dezimalstellen (grid.decimal, bar.decimals)
+ */
+
 import { LitElement, html, css, svg } from "/local/libs/lit-element.js?module";
 
 const DEFAULTS = {
@@ -19,6 +37,7 @@ const DEFAULTS = {
     min: 0,
     max: 100,
     lines: 5,
+    decimal: 1,
     color: "#999",
     width: 1,
     dash: "3,2",
@@ -66,36 +85,43 @@ class CustomBarchartCard extends LitElement {
     if (isLog) {
       const max = g.max;
       const logMax = Math.log10(max + 1);
-      const ticks = [1, 2, 5, 10, 20, 50, 100];
+      const lineCount = g.lines ?? 5;
 
-      ticks.forEach((tick) => {
-        if (tick > max) return;
+      for (let i = 0; i <= lineCount; i++) {
+        const fraction = i / lineCount;
+        const logValue = fraction * logMax;
+        const value = Math.pow(10, logValue) - 1;
 
-        const logValue = Math.log10(tick + 1) / logMax;
-        const yOffset = (logValue * height) / 2;
+        const yOffset = (fraction * height) / 2;
 
         // positive Linie
         const yPos = centerY - yOffset;
         lines.push(svg`
           <line x1="0" y1="${yPos}" x2="${width}" y2="${yPos}"
-              stroke="${g.color}" stroke-width="${g.width}" stroke-dasharray="${g.dash}" />
+              stroke="${g.color}" stroke-width="${g.width}" stroke-dasharray="${
+          g.dash
+        }" />
           <text x="-10" y="${yPos}" text-anchor="end" fill="${g.font_color}"
               font-size="${g.font_size}" dominant-baseline="middle">
-              ${tick}
+              ${value.toFixed(g.decimal)}
           </text>
         `);
 
         // negative Linie
-        const yNeg = centerY + yOffset;
-        lines.push(svg`
-          <line x1="0" y1="${yNeg}" x2="${width}" y2="${yNeg}"
-              stroke="${g.color}" stroke-width="${g.width}" stroke-dasharray="${g.dash}" />
-          <text x="-10" y="${yNeg}" text-anchor="end" fill="${g.font_color}"
-              font-size="${g.font_size}" dominant-baseline="middle">
-              -${tick}
-          </text>
-        `);
-      });
+        if (i > 0) {
+          const yNeg = centerY + yOffset;
+          lines.push(svg`
+            <line x1="0" y1="${yNeg}" x2="${width}" y2="${yNeg}"
+                stroke="${g.color}" stroke-width="${
+            g.width
+          }" stroke-dasharray="${g.dash}" />
+            <text x="-10" y="${yNeg}" text-anchor="end" fill="${g.font_color}"
+                font-size="${g.font_size}" dominant-baseline="middle">
+                -${value.toFixed(g.decimal)}
+            </text>
+          `);
+        }
+      }
 
       // Mittelachse (0-Linie)
       lines.push(svg`
@@ -105,12 +131,6 @@ class CustomBarchartCard extends LitElement {
       // Y-Achse links
       lines.push(svg`
         <line x1="0" y1="0" x2="0" y2="${height}"
-              stroke="${g.axis_color}" stroke-width="${g.axis_width}" />
-      `);
-
-      // X-Achse unten (optional, wenn du sie auch unten willst)
-      lines.push(svg`
-        <line x1="0" y1="${height}" x2="${width}" y2="${height}"
               stroke="${g.axis_color}" stroke-width="${g.axis_width}" />
       `);
     } else {
@@ -129,7 +149,7 @@ class CustomBarchartCard extends LitElement {
               fill="${g.font_color}" font-size="${
           g.font_size
         }" dominant-baseline="middle">
-            ${value.toFixed(0)}
+            ${value.toFixed(g.decimal)}
           </text>
         `);
       }
@@ -205,7 +225,7 @@ class CustomBarchartCard extends LitElement {
 
       elements.push(svg`
         <rect x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}"
-            fill="${bar.color || "#999"}" 
+            fill="${bar.color || "#999"}"
             style="cursor: pointer;"
             @click=${handleTap} />
       `);
