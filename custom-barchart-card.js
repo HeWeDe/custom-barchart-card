@@ -1,7 +1,7 @@
 /**
  * Custom Barchart Card for Home Assistant
- * Version: 1.1.2
- * Date: 2025-07-06
+ * Version: 1.1.3
+ * Date: 2025-07-07
  * Repository: https://github.com/HeWeDe/custom-barchart-card
  * Author: HeWeDe (https://github.com/HeWeDe)
  * License: MIT
@@ -66,8 +66,10 @@ class CustomBarchartCard extends LitElement {
     .card-content {
       min-height: 300px;
     }
+    .bar {
+      transition: y 0.5s ease, height 0.5s ease;
+    }
   `;
-
   setConfig(config) {
     this.config = {
       ...DEFAULTS,
@@ -224,7 +226,7 @@ class CustomBarchartCard extends LitElement {
       }
 
       elements.push(svg`
-        <rect x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}"
+        <rect class="bar" x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}"
             fill="${bar.color || "#999"}"
             style="cursor: pointer;"
             @click=${handleTap} />
