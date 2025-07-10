@@ -1,20 +1,20 @@
 # Custom Barchart Card for Home Assistant
 
-A flexible and customizable bar chart card for Home Assistant dashboards, supporting linear and logarithmic scales, symmetric axes, clickable bars, and dynamic markers.
+A flexible and customizable bar chart card for Home Assistant dashboards, supporting linear and logarithmic scales (symmetric or positive), clickable bars, dynamic markers, and fine-tuned layout options.
 
 ---
 
 ## ✨ Features
 
-* Vertical bar chart with:
-
-  * Multiple bars with individual entities or entity groups
-  * Linear and symmetric logarithmic scaling
-  * Optional min/max clamping
-  * Axis grid and unit display
-  * Max-value marker line per bar
-  * Clickable bars for `more-info`, navigation, or custom URLs
-  * **Custom decimal places** for grid labels (new in v1.1.2)
+- Vertical bar chart with:
+  - Multiple bars with individual entities or grouped sums
+  - Linear or logarithmic Y-axis
+  - Two logarithmic modes: `symmetric` (±) or `positive` (from 0)
+  - Custom Y-axis grid with unit and decimal options
+  - Optional max marker per bar (with value)
+  - Clickable bars with `more-info`, navigation, or URL actions
+  - Smooth animations for bar height changes
+  - Configurable font sizes and colors
 
 ---
 
@@ -22,33 +22,32 @@ A flexible and customizable bar chart card for Home Assistant dashboards, suppor
 
 ### Manual
 
-1. Download `custom-barchart-card.js` to your `www` folder (e.g. `/config/www/`)
-2. Add this to your `ui-lovelace.yaml` or dashboard resource:
+1. Download `custom-barchart-card.js` to your `/config/www/` folder.
+2. Add the resource in `ui-lovelace.yaml` or via the dashboard UI:
 
-   ```yaml
-   resources:
-     - url: /local/custom-barchart-card.js
-       type: module
-   ```
+```yaml
+resources:
+  - url: /local/custom-barchart-card.js
+    type: module
+```
 
 ### HACS (planned)
 
-*Coming soon. Will be available in the HACS frontend as a custom repository.*
+Coming soon — will be available via HACS as a custom repository.
 
 ---
 
-## ✏️ Configuration
+## 🧩 Configuration
 
-### Example (Minimal)
+### Minimal Example
 
 ```yaml
-type: custom-barchart-card
+type: custom:custom-barchart-card
 title: Power Overview
 grid:
-  min: -5
-  max: 5
+  min: 0
+  max: 10
   unit: kW
-  decimal: 1
 bars:
   - name: Solar
     entity: sensor.solar_power
@@ -56,16 +55,15 @@ bars:
   - name: Load
     entity: sensor.load_power
     color: red
-    tap_action:
-      action: more-info
 ```
 
-### Example with symmetric logarithmic scale
+### Symmetric Logarithmic Scale (±)
 
 ```yaml
-type: custom-barchart-card
+type: custom:custom-barchart-card
 title: Grid Flow
 logarithmic: true
+logarithmic_mode: symmetric
 grid:
   max: 10
   unit: kW
@@ -76,86 +74,126 @@ bars:
     color: green
 ```
 
----
-
-## 🔢 Parameters
-
-### General
-
-| Name          | Type    | Default | Description                           |
-| ------------- | ------- | ------- | ------------------------------------- |
-| `title`       | string  | ""      | Optional title shown at the top       |
-| `logarithmic` | boolean | false   | Enables symmetric logarithmic scaling |
-| `symmetric`   | boolean | false   | Use midpoint axis (0) for display     |
-| `bars`        | array   |         | List of bar definitions (see below)   |
-| `grid`        | object  |         | Axis settings (see below)             |
-| `max_marker`  | object  |         | Global style for max marker per bar   |
-
-### Grid
-
-| Name             | Type   | Default | Description                                 |
-| ---------------- | ------ | ------- | ------------------------------------------- |
-| `min`            | number | 0       | Minimum value of axis (ignored in log mode) |
-| `max`            | number | 100     | Maximum value of axis                       |
-| `lines`          | number | 5       | Number of horizontal lines                  |
-| `decimal`        | number | 1       | **Decimal places for grid labels**          |
-| `unit`           | string |         | Unit label shown on Y-axis                  |
-| `color`          | string | `#999`  | Grid line color                             |
-| `width`          | number | 1       | Grid line width                             |
-| `dash`           | string | `3,2`   | Grid dash style                             |
-| `axis_color`     | string | `#000`  | Axis (X/Y) color                            |
-| `axis_width`     | number | 1.5     | Axis line width                             |
-| `font_size`      | number | 10      | Tick label font size                        |
-| `font_size_unit` | number | 20      | Font size of unit label                     |
-| `font_color`     | string | `#666`  | Color of tick and unit labels               |
-
-### Bar definition (inside `bars` array)
-
-| Name         | Type      | Default | Description                    |
-| ------------ | --------- | ------- | ------------------------------ |
-| `name`       | string    |         | Label shown under the bar      |
-| `entity`     | string    |         | Entity to read value from      |
-| `entities`   | string\[] |         | Sum of multiple entities       |
-| `color`      | string    | `#999`  | Bar fill color                 |
-| `font_size`  | number    | 12      | Font size for value and name   |
-| `decimals`   | number    | 3       | Decimal places for value label |
-| `max_entity` | string    |         | Optional max-line entity       |
-| `tap_action` | object    |         | Click behavior (see below)     |
-
-### `tap_action` (per bar)
-
-| Action      | Description                     |
-| ----------- | ------------------------------- |
-| `more-info` | Opens entity detail popup       |
-| `navigate`  | Navigates to a Lovelace path    |
-| `url`       | Opens a custom URL in a new tab |
-| `none`      | Disables click action           |
+### Positive Logarithmic Scale (≥ 0)
 
 ```yaml
-  tap_action:
-    action: navigate
-    navigation_path: /lovelace/energy
+type: custom:custom-barchart-card
+title: Load
+logarithmic: true
+logarithmic_mode: positive
+grid:
+  max: 10
+  unit: kW
+bars:
+  - name: Load
+    entity: sensor.load_power
+    color: blue
 ```
 
 ---
 
-## 🔹 Future Ideas
+## 🔧 Parameters
 
-* Tooltip on hover
-* Optional bar outlines
-* Dynamic color thresholds
-* Horizontal layout
+### General
+
+| Name               | Type    | Default     | Description                                           |
+|--------------------|---------|-------------|-------------------------------------------------------|
+| `title`            | string  | `""`        | Optional title shown at the top                      |
+| `logarithmic`      | boolean | `false`     | Enables logarithmic scaling                          |
+| `logarithmic_mode` | string  | `symmetric` | `symmetric` (± center) or `positive` (starts at 0)   |
+| `symmetric`        | boolean | `false`     | Legacy; now replaced by `logarithmic_mode`           |
+| `bars`             | array   | —           | List of bar definitions                              |
+| `grid`             | object  | —           | Grid and axis configuration                          |
+| `max_marker`       | object  | —           | Styling for max marker line per bar                  |
+| `font_size`        | number  | `18`        | Font size of the title                               |
 
 ---
 
-## 🚀 License & Credits
+### Grid Options
 
-This card was developed by \[YOUR NAME] inspired by the `custom-gauge-card`.
-MIT License. Contributions welcome!
+| Name             | Type   | Default | Description                                |
+|------------------|--------|---------|--------------------------------------------|
+| `min`            | number | `0`     | Minimum Y value (ignored in log mode)      |
+| `max`            | number | `100`   | Maximum Y value                            |
+| `lines`          | number | `5`     | Number of horizontal lines                 |
+| `decimal`        | number | `1`     | Decimal places for Y-axis labels           |
+| `unit`           | string |         | Unit label shown on Y-axis                 |
+| `color`          | string | `#999`  | Grid line color                            |
+| `width`          | number | `1`     | Grid line width                            |
+| `dash`           | string | `3,2`   | Grid line dash style                       |
+| `axis_color`     | string | `#000`  | Axis line color                            |
+| `axis_width`     | number | `1.5`   | Axis line width                            |
+| `font_size`      | number | `10`    | Font size of grid label                    |
+| `font_size_unit` | number | `20`    | Font size for unit label                   |
+| `font_color`     | string | `#666`  | Color of labels                            |
 
 ---
 
-## 📍 GitHub Repository
+### Bar Definition
+
+| Name         | Type      | Default | Description                                      |
+|--------------|-----------|---------|--------------------------------------------------|
+| `name`       | string    | —       | Label below the bar                             |
+| `entity`     | string    | —       | Single entity for the bar                        |
+| `entities`   | string[]  | —       | List of entities to be summed                    |
+| `color`      | string    | `#999`  | Bar fill color                                   |
+| `font_size`  | number    | `12`    | Font size for value and label                    |
+| `decimals`   | number    | `3`     | Decimal places for bar value                     |
+| `max_entity` | string    | —       | Entity providing the max value marker            |
+| `tap_action` | object    | —       | Action triggered when the bar is clicked         |
+
+#### Example:
+
+```yaml
+bars:
+  - name: Load L1
+    entity: sensor.load_l1
+    max_entity: sensor.load_l1_max
+    color: "#0077cc"
+    tap_action:
+      action: more-info
+```
+
+---
+
+### Tap Actions
+
+| Action       | Description                          |
+|--------------|--------------------------------------|
+| `more-info`  | Show entity info popup               |
+| `navigate`   | Navigate to Lovelace path            |
+| `url`        | Open external URL in new tab         |
+| `none`       | Disable tap interaction              |
+
+```yaml
+tap_action:
+  action: navigate
+  navigation_path: /lovelace/energy
+```
+
+---
+
+## 🕘 Changelog
+
+### 1.1.4 – 2025-07-10
+- **New:** `logarithmic_mode` option with `symmetric` and `positive`
+- Improved handling of baseline in log mode
+- Minor visual fixes and optimizations
+
+### 1.1.2
+- Added `grid.decimal` for fixed decimal places on Y-axis
+
+---
+
+## 👤 Author & License
+
+Created by [HeWeDe](https://github.com/HeWeDe)
+License: MIT
+Feedback and pull requests welcome!
+
+---
+
+## 📍 GitHub
 
 [https://github.com/HeWeDe/custom-barchart-card](https://github.com/HeWeDe/custom-barchart-card)
 
@@ -163,3 +201,7 @@ MIT License. Contributions welcome!
 
 ### 1.1.2
 - Added `grid.decimal` option for fixed decimal places on linear Y-axis.
+### 1.1.3
+- `logarithmic` option (`true` / `false`).
+### 1.1.4
+- `logarithmic_mode` option (`symmetric` / `positive`).
