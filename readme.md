@@ -180,6 +180,9 @@ tap_action:
 - Improved handling of baseline in log mode
 - Minor visual fixes and optimizations
 
+### 1.1.3
+- `logarithmic` option (`true` / `false`).
+
 ### 1.1.2
 - Added `grid.decimal` for fixed decimal places on Y-axis
 
@@ -196,12 +199,3 @@ Feedback and pull requests welcome!
 ## 📍 GitHub
 
 [https://github.com/HeWeDe/custom-barchart-card](https://github.com/HeWeDe/custom-barchart-card)
-
-## 🕘 Changelog
-
-### 1.1.2
-- Added `grid.decimal` option for fixed decimal places on linear Y-axis.
-### 1.1.3
-- `logarithmic` option (`true` / `false`).
-### 1.1.4
-- `logarithmic_mode` option (`symmetric` / `positive`).
